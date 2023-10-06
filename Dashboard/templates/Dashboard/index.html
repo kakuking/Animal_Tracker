@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+</head>
+<body>
+    <div id="map" style="width: 800px; height: 600px;"></div>
+    <button id="addPointButton" onclick="addRandomPoint()">Add Random Point</button>
+    <button id="clearPointsButton" onclick="clearPoints()">Clear All Points</button>
+    
+</body>
+
+<script>
+    const x = 17.543610;
+    const y = 78.574729;
+    var map = L.map('map', {
+        minZoom: 16,
+        maxZoom: 18,
+        maxBounds: [
+            [17.550314, 78.565750],
+            [17.536213, 78.580764]
+        ]
+    }).setView([x, y], 16);
+    let max_heat_map_val = 0;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //maxZoom: 17,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add a marker to the locked location
+    var marker = L.marker([x, y]).addTo(map);
+
+    // Create an empty array to store heatmap data
+    var heatmapData = [];
+
+    // Create a heatmap layer using Leaflet.heat
+    var heatmapLayer = L.heatLayer(heatmapData, {
+        radius: 30, // Adjust the radius
+        max: 1.0,   // Adjust the maximum
+    }).addTo(map);
+
+    // Function to add a random point to the heatmap
+    function addRandomPoint() {
+        var randomLat = x + Math.random() * 0.005; // Adjust latitude range as needed
+        var randomLng = y + Math.random() * 0.005; // Adjust longitude range as needed
+        var randomIntensity = 1 ;
+        
+        var newPoint = [randomLat, randomLng, randomIntensity];
+        heatmapData.push(newPoint);
+
+        if(randomIntensity > max_heat_map_val)
+            max_heat_map_val = randomIntensity;
+
+        map.removeLayer(heatmapLayer);
+        heatmapLayer = L.heatLayer(heatmapData, {
+            radius: 10,
+            max: 0.1,
+        }).addTo(map);
+
+        console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
+    }
+
+    function clearPoints(){
+        heatmapData = [];
+        max_heat_map_val = 0;
+
+        map.removeLayer(heatmapLayer);
+        heatmapLayer = L.heatLayer(heatmapData, {
+            radius: 10,
+            max: 0.1,
+        }).addTo(map);
+
+        console.log("Cleared all points; Current max: ", max_heat_map_val);
+
+    }
+
+    // Add event listener to the button
+    //var addPointButton = document.getElementById('addPointButton');
+    //addPointButton.addEventListener('click', addRandomPoint);
+</script>
+
+</html>
