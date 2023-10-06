@@ -9,8 +9,14 @@
     <div id="map" style="width: 800px; height: 600px;"></div>
     <button id="addPointButton" onclick="addRandomPoint()">Add Random Point</button>
     <button id="clearPointsButton" onclick="clearPoints()">Clear All Points</button>
-    
+    <button id="getLocation" onclick="getLocation()">Get location</button>
 </body>
+
+<style>
+    #map{
+        cursor: pointer;
+    }
+</style>
 
 <script>
     const x = 17.543610;
@@ -30,8 +36,16 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
+    map.on('click', function(e) {
+        var lat = e.latlng.lat; // Latitude of the clicked point
+        var lng = e.latlng.lng; // Longitude of the clicked point
+    
+        // Do something with the lat and lng values, such as displaying them
+        console.log('You clicked at: Lat ' + lat + ', Lng ' + lng);
+    })
+
     // Add a marker to the locked location
-    var marker = L.marker([x, y]).addTo(map);
+    // var marker = L.marker([x, y]).addTo(map);
 
     // Create an empty array to store heatmap data
     var heatmapData = [];
@@ -75,6 +89,21 @@
 
         console.log("Cleared all points; Current max: ", max_heat_map_val);
 
+    }
+
+
+    // Not very accurate, 
+    function getLocation(){
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+
+                console.log(`${latitude};${longitude}`)
+            });
+        } else {
+            console.error('Geolocation is not available in this browser.');
+        }
     }
 
     // Add event listener to the button
