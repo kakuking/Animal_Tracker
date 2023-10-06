@@ -3,5 +3,5 @@ from Dashboard.models import sighting, animal
 
 # Create your views here.
 def index(request):
-
-    return render(request, 'Dashboard/index.html')
+    
+    return render(request, 'Dashboard/index.html', context={'sightings': sighting.objects.all()})

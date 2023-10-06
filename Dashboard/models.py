@@ -15,5 +15,5 @@ class sighting(models.Model):
 
     
     def __str__(self):
-        return f""
+        return f"{self.latitude}, {self.longitude}, {self.animalType}"
 

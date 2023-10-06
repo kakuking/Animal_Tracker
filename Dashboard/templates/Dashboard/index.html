@@ -5,7 +5,8 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
-<body>
+
+<body onload="addSightingsToMap()">
     <div id="map" style="width: 800px; height: 600px;"></div>
     <button id="addPointButton" onclick="addRandomPoint()">Add Random Point</button>
     <button id="clearPointsButton" onclick="clearPoints()">Clear All Points</button>
@@ -59,22 +60,10 @@
     // Function to add a random point to the heatmap
     function addRandomPoint() {
         var randomLat = x + Math.random() * 0.005; // Adjust latitude range as needed
-        var randomLng = y + Math.random() * 0.005; // Adjust longitude range as needed
+        var randomLong = y + Math.random() * 0.005; // Adjust longitude range as needed
         var randomIntensity = 1 ;
         
-        var newPoint = [randomLat, randomLng, randomIntensity];
-        heatmapData.push(newPoint);
-
-        if(randomIntensity > max_heat_map_val)
-            max_heat_map_val = randomIntensity;
-
-        map.removeLayer(heatmapLayer);
-        heatmapLayer = L.heatLayer(heatmapData, {
-            radius: 10,
-            max: 0.1,
-        }).addTo(map);
-
-        console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
+        addPoint(randomLat, randomLong, randomIntensity);
     }
 
     function clearPoints(){
@@ -91,6 +80,21 @@
 
     }
 
+    function addPoint(lat, long, intensity){
+        var newPoint = [lat, long, intensity];
+        heatmapData.push(newPoint);
+
+        if(intensity > max_heat_map_val)
+            max_heat_map_val = intensity;
+
+        map.removeLayer(heatmapLayer);
+        heatmapLayer = L.heatLayer(heatmapData, {
+            radius: 10,
+            max: 0.1,
+        }).addTo(map);
+
+        console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
+    }
 
     // Not very accurate, 
     function getLocation(){
@@ -106,6 +110,12 @@
         }
     }
 
+    function addSightingsToMap(){
+        let sightings = JSON.parse('{{ sightings|safe }}');
+
+        console.log(sightings);
+
+    }
     // Add event listener to the button
     //var addPointButton = document.getElementById('addPointButton');
     //addPointButton.addEventListener('click', addRandomPoint);
