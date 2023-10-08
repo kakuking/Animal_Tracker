@@ -45,9 +45,6 @@
         console.log('You clicked at: Lat ' + lat + ', Lng ' + lng);
     })
 
-    // Add a marker to the locked location
-    // var marker = L.marker([x, y]).addTo(map);
-
     // Create an empty array to store heatmap data
     var heatmapData = [];
 
@@ -96,7 +93,7 @@
         console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
     }
 
-    // Not very accurate, 
+    // Not very accurate, gets location using location API
     function getLocation(){
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
@@ -111,14 +108,15 @@
     }
 
     function addSightingsToMap(){
-        let sightings = JSON.parse('{{ sightings|safe }}');
-
-        console.log(sightings);
-
+        let lat = 0
+        let long = 0 
+        {%for sighting in sightings%}
+            lat = +'{{sighting.latitude}}'
+            long = +'{{sighting.longitude}}'
+            addPoint(lat, long, 1);
+        {% endfor %}
+        
     }
-    // Add event listener to the button
-    //var addPointButton = document.getElementById('addPointButton');
-    //addPointButton.addEventListener('click', addRandomPoint);
 </script>
 
 </html>
