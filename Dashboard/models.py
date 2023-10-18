@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 
 class animal(models.Model):
     animal = models.CharField(default="Animal", max_length=255)
@@ -11,7 +11,7 @@ class sighting(models.Model):
     latitude = models.FloatField(default=17.543610)
     longitude = models.FloatField(default=78.574729)
     animalType = models.ForeignKey(animal, on_delete=models.CASCADE)
-    lastSeen = models.TimeField(auto_now=True)
+    dateTime = models.DateTimeField(default=timezone.now)
 
     
     def __str__(self):
