@@ -6,42 +6,6 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
 
-<body onload="addSightingsToMap()">
-    <div id="map" style="width: 100%; height: 600px;"></div>
-    <button id="addPointButton" onclick="addRandomPoint()">Add Random Point</button>
-    <button id="clearPointsButton" onclick="clearPoints()">Clear All Points</button>
-    <button id="getLocation" onclick="getLocation()">Get location</button>
-
-
-    <div>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Animal</th>
-                    <th>Last Seen</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sighting in sightings %}
-                <tr class="sightingRow"
-                    onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}')"
-                    onmouseleave="removeMapMarker()">
-                    <td>{{ sighting.id }}</td>
-                        <td>
-                            {% if sighting.animalType_id == 1 %}
-                                dog
-                            {% else %}
-                                {{ sighting.animalType_id }}
-                            {% endif %}
-                        </td>
-                    <td>{{ sighting.dateTime }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</body>
 
 <style>
     #map{
@@ -49,6 +13,7 @@
     }
 
     table {
+        cursor: default;
         border-collapse: collapse;
     }
     table, th, td{
@@ -60,9 +25,80 @@
     }
     .sightingRow:hover{
         background-color: aquamarine;
-        cursor: pointer;
+    }
+
+    #AddPointDiv{
+        display: none;
+    }
+
+    #addPointButton{
+        display: block;
+    }
+
+    .selectedAnimal, .selectedManner {
+        background-color: lime;
+    }
+
+    #askForClick {
+        display: none;
     }
 </style>
+
+<body onload="addSightingsToMap()">
+    <div id="map" style="width: 100%; height: 600px;"></div>
+    
+    <!-- Add a new point -->
+    <button onclick="askSightingManner()" id="addPointButton">  Add a sighting </button>
+    <div id="AddPointDiv">
+        <div class="addingManner">
+            <button onclick="setManner('click', this); askForClick()" id="askForClicking">       Click to Add </button>
+            <button onclick="setManner('ask', this); getLocation()" id="askForLocation">    Automatically Locate </button>
+        </div>
+        
+        <div class="addAnimal">
+            {% for animal in animals %}
+                <button onclick="setAnimal('{{animal.id}}', this)"> {{animal.animal}} </button>
+            {% endfor %}
+        </div>
+
+        <div id="addConfirmation">
+            <!-- <div id="selectedInfo"></div> -->
+            <button onclick="sendPostRequest()">
+                Please Click To Confirm
+            </button>
+        </div>
+
+        <div id="askForClick">
+            Please Click on the map, where the sighting occurred
+        </div> 
+
+        <button onclick="cancelAdding()" id="cancelAdding"> Cancel </button>
+    </div>
+
+    <!-- Table -->
+    <div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Animal</th>
+                <th>Last Seen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sighting in sightings %}
+            <tr class="sightingRow"
+                onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
+                onmouseleave="removeMapMarker()">
+                <td>{{ sighting.id }}</td>
+                <td>{{ sighting.animalType.animal }}</td>
+                <td>{{ sighting.dateTime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</body>
 
 <script>
     const x = 17.543610;
@@ -83,11 +119,21 @@
     }).addTo(map);
 
     map.on('click', function(e) {
+        if(settingLocation == false){
+            return;
+        }
         var lat = e.latlng.lat; // Latitude of the clicked point
         var lng = e.latlng.lng; // Longitude of the clicked point
-    
-        // Do something with the lat and lng values, such as displaying them
-        console.log('You clicked at: Lat ' + lat + ', Lng ' + lng);
+        
+        selectedLocation['latitude'] = "" + lat;
+        selectedLocation['longitude'] = "" + lng;
+        settingLocation = false;
+        askForClickDiv.style.display = 'none';
+
+        if(selectedAnimal != ""){
+            askForConfirmationOnAdd();
+        }
+        //console.log("clicked at: " + lat + ", " + lng);
     })
 
     // Create an empty array to store heatmap data
@@ -135,15 +181,21 @@
             max: 0.1,
         }).addTo(map);
 
-        console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
+        //console.log('Added new point:', newPoint, " Current max: ", max_heat_map_val);
     }
 
     // Not very accurate, gets location using location API
     function getLocation(){
-        if ('geolocation' in navigator) {
+        if (settingLocation == true && 'geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var latitude = position.coords.latitude;
                 var longitude = position.coords.longitude;
+                
+                selectedLocation['latitude'] = `${latitude}`;
+                selectedLocation['longitude'] = `${longitude}`;
+
+                settingLocation = false;
+                askForConfirmationOnAdd();
 
                 console.log(`${latitude},${longitude}`)
             });
@@ -164,18 +216,36 @@
         
     }
 
+    var customDogMarker = L.icon({
+        iconUrl: 'https://i.imgur.com/RoBYgu4.jpg',
+        iconSize: [32, 32], // width and height of the icon in pixels
+        iconAnchor: [16, 16], // position of the icon anchor (centered at the bottom)
+        popupAnchor: [0, -32] // position of the popup anchor (above the icon)
+    });
+
+    var customCatMarker  = L.icon({
+        iconUrl: 'https://i.imgur.com/OnMZWPP.jpg',
+        iconSize: [32, 32], // width and height of the icon in pixels
+        iconAnchor: [16, 16], // position of the icon anchor (centered at the bottom)
+        popupAnchor: [0, -32] // position of the popup anchor (above the icon)
+    });
+
+    let markers = {
+        'Dog': customDogMarker,
+        'Cat': customCatMarker
+    }
 
     // For when you hover on table
     var currentHoverMarker = null;
 
     // Adds marker when you hover on table
-    function addMapMarker(latitude, longitude){
+    function addMapMarker(latitude, longitude, animal){
         if(currentHoverMarker != null){
             map.removeLayer(currentHoverMarker);
             currentHoverMarker = null;
         }
 
-        currentHoverMarker = L.marker([+latitude, +longitude]).addTo(map);
+        currentHoverMarker = L.marker([+latitude, +longitude], {icon: markers[animal]}).addTo(map);
     }
 
     // Removes marker when you stop hovering
@@ -186,7 +256,92 @@
         }
     }
 
+    const addButton = document.getElementById("addPointButton");
+    const addDiv = document.getElementById("AddPointDiv");
+    const confirmDiv = document.getElementById('addConfirmation');
+    const selectedInfo = document.getElementById('selectedInfo');
+    const askForClickDiv = document.getElementById('askForClick');
 
+    var selectedAnimal = 0;
+    var selectedManner = "";
+    var settingLocation = false;
+
+    var selectedLocation = {
+        'longitude' : '',
+        'latitude'  : ''
+    };
+
+    // Shows div to add sighting
+    function askSightingManner(){
+        addButton.style.display = 'none';
+        addDiv.style.display = 'block';
+        confirmDiv.style.display = 'none';
+    }
+
+    // Removes div shows button
+    function cancelAdding(){
+        addButton.style.display = 'block';
+        addDiv.style.display = 'none';
+        confirmDiv.style.display = 'none';
+    }
+
+    function setAnimal(animal, button){
+        let others = document.getElementsByClassName("selectedAnimal");
+        for( let other of others){
+            other.classList.remove("selectedAnimal");
+        }
+
+        button.classList.add("selectedAnimal");
+        selectedAnimal = +animal;
+        
+        if(selectedLocation['latitude'] != ''){
+            askForConfirmationOnAdd();
+        }
+    }
+
+    function askForClick(){
+        askForClickDiv.style.display = 'block';
+    }
+
+    function setManner(manner, button){
+        let others = document.getElementsByClassName("selectedManner");
+        for( let other of others){
+            other.classList.remove("selectedManner");
+        }
+
+        settingLocation = true;
+
+        button.classList.add("selectedManner");
+        selectedManner = manner;
+    }
+
+    function askForConfirmationOnAdd(){
+        //selectedInfo.innerHTML = selectedAnimal + " sighting at " + selectedLocation['latitude'] + ", " + selectedLocation['longitude'] + " please confirm";
+        confirmDiv.style.display = 'block';
+    }
+
+    function sendPostRequest(){
+        const url = "http://127.0.0.1:8000/addSighting";
+        const data = {
+            "animal": selectedAnimal,
+            "latitude": selectedLocation["latitude"],
+            "longitude": selectedLocation["longitude"]
+        };
+
+        const headers = {
+            'Content-Type': 'application/json', // You can adjust this as needed
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(data)
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+        addPoint(selectedLocation["latitude"],selectedLocation["longitude"],1);
+    }
 </script>
 
 </html>
