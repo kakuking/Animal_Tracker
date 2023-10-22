@@ -13,7 +13,6 @@
 /* body and headers in general */
 body{
     background: linear-gradient(var(--color_start_body), var(--color_end_body));
-    -moz-background-size: 100%;
     display: grid;
     grid-template-columns: [a]5rem  [b]auto;
     grid-template-areas: "a b";
