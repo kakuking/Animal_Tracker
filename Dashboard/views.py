@@ -2,7 +2,7 @@ from django.shortcuts import render
 from Dashboard.models import sighting, animal
 
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
@@ -35,5 +35,8 @@ def addSighting(request):
 
     print("Added Sighting");
 
-    return HttpResponse(status=200)
+    return JsonResponse(data={
+        'serialNum': sig.id,
+        'dateTime': sig.dateTime
+    })
 

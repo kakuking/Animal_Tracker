@@ -1,11 +1,19 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dosis:wght@300&display=swap" rel="stylesheet">
+
 <head>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
 
+<!-- For dark or light mode -->
 
 <style>
     #map{
@@ -44,61 +52,129 @@
     }
 </style>
 
-<body onload="addSightingsToMap()">
-    <div id="map" style="width: 100%; height: 600px;"></div>
-    
-    <!-- Add a new point -->
-    <button onclick="askSightingManner()" id="addPointButton">  Add a sighting </button>
-    <div id="AddPointDiv">
-        <div class="addingManner">
-            <button onclick="setManner('click', this); askForClick()" id="askForClicking">       Click to Add </button>
-            <button onclick="setManner('ask', this); getLocation()" id="askForLocation">    Automatically Locate </button>
-        </div>
-        
-        <div class="addAnimal">
-            {% for animal in animals %}
-                <button onclick="setAnimal('{{animal.id}}', this)"> {{animal.animal}} </button>
-            {% endfor %}
-        </div>
+<link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 
-        <div id="addConfirmation">
-            <!-- <div id="selectedInfo"></div> -->
-            <button onclick="sendPostRequest()">
-                Please Click To Confirm
-            </button>
-        </div>
-
-        <div id="askForClick">
-            Please Click on the map, where the sighting occurred
-        </div> 
-
-        <button onclick="cancelAdding()" id="cancelAdding"> Cancel </button>
+<body onload="addSightingsToMap()" class="dark_mode">
+    <div class="NavBar dark_mode" id="navbar">
+        <a title="One" class="item1 items">1 </a>
+        <a title="Two" class="item2 items">2</a>
+        <a title="change theme" class="dark items" id="changeTheme">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="sun-and-moon">
+            <g id="moon" class="night">
+                <path id="moon_2" fill-rule="evenodd" clip-rule="evenodd" d="M50.5 73C62.9264 73 73 62.9264 73 50.5C73 49.6864 72.9568 48.8828 72.8726 48.0916C71.8418 56.4937 64.6807 63 56 63C46.6112 63 39 55.3888 39 46C39 36.6112 46.6112 29 56 29C56.4418 29 56.8797 29.0169 57.313 29.05C55.1639 28.368 52.8749 28 50.5 28C38.0736 28 28 38.0736 28 50.5C28 62.9264 38.0736 73 50.5 73Z" fill="#FFE792"/>
+            </g>
+            <g id="Sun" class="day">
+                <circle id="Sun_inner" cx="50.5" cy="50.5" r="22.5" fill="#FFC703"/>
+                <circle id="Sun_outer" cx="50.5" cy="50.5" r="28.5" fill="#FF8D3B" fill-opacity="0.5"/>
+            </g>
+            <g id="Stars" class="night">
+                <path id="Star 1" class="stars" d="M68.5 13L69.9593 17.4914H74.6819L70.8613 20.2672L72.3206 24.7586L68.5 21.9828L64.6794 24.7586L66.1387 20.2672L62.3181 17.4914H67.0407L68.5 13Z" fill="#FCFF68"/>
+                <path id="Star 2" class="stars" d="M21 31L21.8981 33.7639H24.8042L22.4531 35.4721L23.3511 38.2361L21 36.5279L18.6489 38.2361L19.5469 35.4721L17.1958 33.7639H20.1019L21 31Z" fill="#FCFF68"/>
+                <path id="Star 3" class="stars" d="M45 77L45.6735 78.7275H47.8532L46.0898 79.7951L46.7634 81.5225L45 80.4549L43.2366 81.5225L43.9102 79.7951L42.1468 78.7275H44.3265L45 77Z" fill="#FCFF68"/>
+            </g>
+            </g>
+            </svg>
+        </a>
     </div>
 
-    <!-- Table -->
-    <div>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Animal</th>
-                <th>Last Seen</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sighting in sightings %}
-            <tr class="sightingRow"
-                onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
-                onmouseleave="removeMapMarker()">
-                <td>{{ sighting.id }}</td>
-                <td>{{ sighting.animalType.animal }}</td>
-                <td>{{ sighting.dateTime }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="main">
+        <div id="map" style="width: 100%; height: 600px;"></div>
+        
+        <!-- Add a new point -->
+        <button onclick="askSightingManner()" id="addPointButton">  Add a sighting </button>
+        <div id="AddPointDiv">
+            <div class="addingManner">
+                <button onclick="setManner('click', this); askForClick()" id="askForClicking">       Click to Add </button>
+                <button onclick="setManner('ask', this); getLocation()" id="askForLocation">    Automatically Locate </button>
+            </div>
+            
+            <div class="addAnimal">
+                {% for animal in animals %}
+                    <button onclick="setAnimal('{{animal.id}}', '{{animal.animal}}', this)"> {{animal.animal}} </button>
+                {% endfor %}
+            </div>
+
+            <div id="addConfirmation">
+                <div id="selectedInfo"></div>
+                <button onclick="sendPostRequest()">
+                    Please Click To Confirm
+                </button>
+            </div>
+
+            <div id="askForClick">
+                Please Click on the map, where the sighting occurred
+            </div> 
+
+            <button onclick="cancelAdding()" id="cancelAdding"> Cancel </button>
+        </div>
+
+    </div>
+        <!-- Table -->
+    <div id="sightingsTable">
+        <table id="sightingsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Animal</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody id="sightingsTableBody">
+                {% for sighting in sightings %}
+                <tr class="sightingRow"
+                    onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
+                    onmouseleave="removeMapMarker()">
+                    <td>{{ sighting.id }}</td>
+                    <td>{{ sighting.animalType.animal }}</td>
+                    <td>{{ sighting.dateTime }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
+
+<!-- For light and dark mode -->
+<script>
+    const body = document.body;
+    const navbar = document.getElementById("navbar");
+    const button = document.getElementById("changeTheme");
+    var theme = localStorage.getItem('Storagetheme'); //true is light mode
+
+    // theme = localStorage.getItem('theme');
+    if(theme != null){
+        if(theme == 'light'){
+            body.classList.replace('dark_mode', 'light_mode');
+            navbar.classList.replace('dark_mode', 'light_mode');
+            button.classList.replace('dark', 'light');
+
+        } else {
+            body.classList.replace('light_mode', 'dark_mode');
+            navbar.classList.replace('light_mode', 'dark_mode');
+            button.classList.replace('light', 'dark');
+        }
+    }
+
+    button.onclick = () => {
+        if(theme != 'light'){
+            body.classList.replace('dark_mode', 'light_mode');
+            navbar.classList.replace('dark_mode', 'light_mode');
+            button.classList.replace('dark', 'light');
+
+            localStorage.setItem('Storagetheme', 'light');
+            theme = 'light';
+
+        } else {
+            body.classList.replace('light_mode', 'dark_mode');
+            navbar.classList.replace('light_mode', 'dark_mode');
+            button.classList.replace('light', 'dark');
+            theme = 'dark';
+            localStorage.setItem('Storagetheme', 'dark');
+        }
+    }
+</script>
+
 
 <script>
     const x = 17.543610;
@@ -144,6 +220,23 @@
         radius: 30, // Adjust the radius
         max: 1.0,   // Adjust the maximum
     }).addTo(map);
+
+    heatmapLayer.on('mouseover', function (event) {
+        console.log("Hellp ")
+        var latlng = event.latlng;
+        var marker = L.marker(latlng).addTo(map);
+        marker.bindPopup('Point Details'); // Add a popup to the marker if needed
+        marker.openPopup();
+    });
+    
+    heatmapLayer.on('mouseout', function () {
+        map.closePopup(); // Close the marker's popup
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer); // Remove the marker from the map
+            }
+        });
+    });
 
     // Function to add a random point to the heatmap
     function addRandomPoint() {
@@ -216,24 +309,20 @@
         
     }
 
-    var customDogMarker = L.icon({
-        iconUrl: 'https://i.imgur.com/RoBYgu4.jpg',
-        iconSize: [32, 32], // width and height of the icon in pixels
-        iconAnchor: [16, 16], // position of the icon anchor (centered at the bottom)
-        popupAnchor: [0, -32] // position of the popup anchor (above the icon)
-    });
+    let markers = {}
+    let aniName = "";
+    {%for animal in animals%}
+        aniName = '{{animal.animal}}'
+        var animalLabel = L.icon({
+            //iconUrl: 'https://i.imgur.com/RoBYgu4.jpg',
+            iconUrl: `{% static ""|add:animal.animal|add:".jpg" %}`,
+            iconSize: [32, 32], // width and height of the icon in pixels
+            iconAnchor: [16, 16], // position of the icon anchor (centered at the bottom)
+            popupAnchor: [0, -32] // position of the popup anchor (above the icon)
+        });
 
-    var customCatMarker  = L.icon({
-        iconUrl: 'https://i.imgur.com/OnMZWPP.jpg',
-        iconSize: [32, 32], // width and height of the icon in pixels
-        iconAnchor: [16, 16], // position of the icon anchor (centered at the bottom)
-        popupAnchor: [0, -32] // position of the popup anchor (above the icon)
-    });
-
-    let markers = {
-        'Dog': customDogMarker,
-        'Cat': customCatMarker
-    }
+        markers['{{animal.animal}}'] = animalLabel;
+    {%endfor%}
 
     // For when you hover on table
     var currentHoverMarker = null;
@@ -261,8 +350,10 @@
     const confirmDiv = document.getElementById('addConfirmation');
     const selectedInfo = document.getElementById('selectedInfo');
     const askForClickDiv = document.getElementById('askForClick');
+    const sightingsTableBody = document.getElementById("sightingsTableBody");
 
     var selectedAnimal = 0;
+    var selectedAnimalName = "";
     var selectedManner = "";
     var settingLocation = false;
 
@@ -285,18 +376,30 @@
         confirmDiv.style.display = 'none';
     }
 
-    function setAnimal(animal, button){
-        let others = document.getElementsByClassName("selectedAnimal");
-        for( let other of others){
-            other.classList.remove("selectedAnimal");
-        }
-
+    function setAnimal(animal, animalName, button){
+        clearSetAnimal();
         button.classList.add("selectedAnimal");
         selectedAnimal = +animal;
+        selectedAnimalName = animalName;
         
         if(selectedLocation['latitude'] != ''){
             askForConfirmationOnAdd();
         }
+    }
+
+    function clearSetAnimal(){
+        let others = document.getElementsByClassName("selectedAnimal");
+        for( let other of others){
+            other.classList.remove("selectedAnimal");
+        }
+    }
+
+    function clearSetManner(){
+        let others = document.getElementsByClassName("selectedManner");
+        for( let other of others){
+            other.classList.remove("selectedManner");
+        }
+
     }
 
     function askForClick(){
@@ -304,10 +407,7 @@
     }
 
     function setManner(manner, button){
-        let others = document.getElementsByClassName("selectedManner");
-        for( let other of others){
-            other.classList.remove("selectedManner");
-        }
+        clearSetManner();
 
         settingLocation = true;
 
@@ -316,7 +416,7 @@
     }
 
     function askForConfirmationOnAdd(){
-        //selectedInfo.innerHTML = selectedAnimal + " sighting at " + selectedLocation['latitude'] + ", " + selectedLocation['longitude'] + " please confirm";
+        selectedInfo.innerHTML = selectedAnimalName + " sighting at " + selectedLocation['latitude'] + ", " + selectedLocation['longitude'] + " please confirm";
         confirmDiv.style.display = 'block';
     }
 
@@ -328,6 +428,12 @@
             "longitude": selectedLocation["longitude"]
         };
 
+        
+        
+        cancelAdding();
+        clearSetAnimal();
+        clearSetManner();
+
         const headers = {
             'Content-Type': 'application/json', // You can adjust this as needed
         };
@@ -336,11 +442,33 @@
             method: 'POST',
             headers: headers,
             body: JSON.stringify(data)
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data)
+            sightingsTableBody.innerHTML +=  `<tr class="sightingRow"
+            onmouseenter="addMapMarker('${selectedLocation['latitude']}', '${selectedLocation['longitude']}', '${selectedAnimalName}')"
+            onmouseleave="removeMapMarker()">
+            <td>${data['serialNum']}</td>
+            <td>${selectedAnimalName}}</td>
+            <td>${data['dateTime']}</td>
+        </tr>`
         })
         .catch(error => {
             console.error('Error:', error);
         });
         addPoint(selectedLocation["latitude"],selectedLocation["longitude"],1);
+        selectedInfo.innerHTML = "";
+        selectedAnimal = 0
+        selectedAnimalName = "";
+        selectedLocation = {
+            'longitude' : '',
+            'latitude'  : ''
+        };
     }
 </script>
 
