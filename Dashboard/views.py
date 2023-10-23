@@ -15,6 +15,16 @@ def index(request):
     }
     return render(request, 'Dashboard/index.html', context=ctx)
 
+def addSightingPage(request):
+    all_sightings = sighting.objects.all()
+    animals = animal.objects.all()
+    ctx = {
+        'sightings': all_sightings,
+        'animals': animals
+    }
+    return render(request, 'Dashboard/addSighting.html', context=ctx)
+
+
 @csrf_exempt
 def addSighting(request):
     if request.method != "POST":

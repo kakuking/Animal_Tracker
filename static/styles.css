@@ -23,7 +23,13 @@ body{
 #sightingsTable{
     grid-column: b;
     width: 100%;
-    margin: 10px;
+    margin-top: 5px;
+}
+
+#map{
+    width: 100%;
+    height: min(500px, 50vh);
+    border-radius: 10px;
 }
 
 table td {
@@ -36,8 +42,14 @@ table td {
         grid-template-areas: "a b c";
     }
 
+    #map{
+        height: 80vh;
+    }
+
     #sightingsTable{
         grid-column: c;
+        margin-top: 1px;
+        margin-left: 2px;
     }
 }
 

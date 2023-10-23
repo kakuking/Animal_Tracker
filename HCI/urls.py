@@ -25,6 +25,7 @@ from Dashboard import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index),
+    path('addSightingPage', views.addSightingPage),
     path('addSighting', views.addSighting),
     ]
     

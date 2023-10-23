@@ -15,9 +15,19 @@
 
 <!-- For dark or light mode -->
 
+<link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+
+<!-- File specific Styles -->
 <style>
     #map{
         cursor: pointer;
+        height: min(650px, 65vh);
+    }
+
+    @media only screen and (max-width: 800px){
+        #map{
+            height: 400px;
+        }
     }
 
     table {
@@ -43,25 +53,66 @@
         display: block;
     }
 
-    .selectedAnimal, .selectedManner {
-        background-color: lime;
-    }
-
     #askForClick {
         display: none;
     }
 
-    
+    button {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+    }
+
+    #askForClicking, #askForLocation, .animalImg, .confirmBtn{
+        margin: 5px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+
+    #askForClicking:hover, #askForLocation:hover, .animalImg:hover, .confirmBtn:hover{
+        background-color: aquamarine;
+        transform: translate(-2px, -2px);
+        box-shadow: 20px 20px 20px rgba(0,0,0,.5);
+    }
+
+    .mannerImg, .animalImg, .confirmBtn{
+        width: 60px;
+        height: 60px;
+    }
+
+    #selectedLocation:hover{
+        cursor: default;
+    }
+
+    .NonSelectedAnimal{
+        filter: grayscale(100%);
+    }
+
+    .selectedManner{
+        background-color: aquamarine;
+    }
+
+    .selectedAnimal {
+        filter: none;
+    }
+
+    .confirmBtn{
+        margin: 2px;
+    }
+
 </style>
 
-<link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 
-<body onload="addSightingsToMap()" class="dark_mode">
+<body class="dark_mode">
     <div class="NavBar dark_mode" id="navbar">
         <a title="One" class="item1 items" href="/">
             <img width="65" height="65" src='{% static "Map.png" %}'>                              
         </a>
-        <a title="Two" class="item2 items" href="/addSightingPage">
+        <a title="Two" class="item2 items">
             <img width="40" height="40" src='{% static "Plus.png" %}'>                              
         </a>
         <a title="change theme" class="dark items" id="changeTheme">
@@ -84,31 +135,35 @@
         </a>
     </div>
 
-    <div class="main">
-        <div id="map" style=""></div>
-    </div>
-        <!-- Table -->
-    <div id="sightingsTable">
-        <table id="sightingsTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Animal</th>
-                    <th>Last Seen</th>
-                </tr>
-            </thead>
-            <tbody id="sightingsTableBody">
-                {% for sighting in sightings %}
-                <tr class="sightingRow"
-                    onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
-                    onmouseleave="removeMapMarker()">
-                    <td>{{ sighting.id }}</td>
-                    <td>{{ sighting.animalType.animal }}</td>
-                    <td>{{ sighting.dateTime }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="main" style="height: 100vh">
+        <div id="map"></div>
+        
+        <!-- Add a new point -->
+        <div class="addingManner">
+            <button onclick="setManner('click', this);" id="askForClicking">
+                <img class="mannerImg" src="{% static 'SelectMap.png' %}" alt="Click on Map">
+            </button>
+            <button onclick="setManner('ask', this); getLocation()" id="askForLocation"> 
+                <img class="mannerImg" src="{% static 'AutoLocate.png' %}" alt="Automatically Set">
+            </button>
+            <button id="selectedLocation" disabled>Selected Location: ~</button>
+        </div>
+        
+        <div class="addAnimal">
+            {% for animal in animals %}
+                <button onclick="setAnimal('{{animal.id}}', '{{animal.animal}}', this)">
+                    <img class="animalImg" src='{% static ""|add:animal.animal|add:".jpg" %}' alt="Automatically Set">
+                </button>
+            {% endfor %}
+        </div>
+
+        <div id="addConfirmation">
+            <div id="selectedInfo"></div>
+            <button onclick="sendPostRequest()" id="confirmBtn" disabled>
+                <img class="confirmBtn" src="{% static 'tick.png' %}" alt="Confirm">
+            </button>
+        </div>
+
     </div>
 </body>
 
@@ -171,6 +226,7 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
+
     map.on('click', function(e) {
         if(settingLocation == false){
             return;
@@ -181,11 +237,18 @@
         selectedLocation['latitude'] = "" + lat;
         selectedLocation['longitude'] = "" + lng;
         settingLocation = false;
-        askForClickDiv.style.display = 'none';
+        selectedLocDiv.innerHTML = `Selected Location: (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
 
         if(selectedAnimal != ""){
-            askForConfirmationOnAdd();
+            enableConfirmButton();
         }
+
+        
+        if(currentSelectedMarker != null){
+            map.removeLayer(currentSelectedMarker);
+            currentSelectedMarker = null;
+        }
+        currentSelectedMarker = L.marker([lat, lng]).addTo(map);
         //console.log("clicked at: " + lat + ", " + lng);
     })
 
@@ -198,6 +261,22 @@
         max: 1.0,   // Adjust the maximum
     }).addTo(map);
 
+    heatmapLayer.on('mouseover', function (event) {
+        console.log("Hellp ")
+        var latlng = event.latlng;
+        var marker = L.marker(latlng).addTo(map);
+        marker.bindPopup('Point Details'); // Add a popup to the marker if needed
+        marker.openPopup();
+    });
+    
+    heatmapLayer.on('mouseout', function () {
+        map.closePopup(); // Close the marker's popup
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer); // Remove the marker from the map
+            }
+        });
+    });
 
     // Function to add a random point to the heatmap
     function addRandomPoint() {
@@ -249,25 +328,22 @@
                 selectedLocation['longitude'] = `${longitude}`;
 
                 settingLocation = false;
-                askForConfirmationOnAdd();
-
-                console.log(`${latitude},${longitude}`)
+                selectedLocDiv.innerHTML = `Selected Location: (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+                if(selectedAnimal != ""){
+                    enableConfirmButton();
+                }
+                
+                if(currentSelectedMarker != null){
+                    map.removeLayer(currentSelectedMarker);
+                    currentSelectedMarker = null;
+                }
+                
+                currentSelectedMarker = L.marker([+latitude, +longitude]).addTo(map);
+                
             });
         } else {
             console.error('Geolocation is not available in this browser.');
         }
-    }
-
-    // adds sightings from passed context to map
-    function addSightingsToMap(){
-        let lat = 0
-        let long = 0 
-        {%for sighting in sightings%}
-            lat = +'{{sighting.latitude}}'
-            long = +'{{sighting.longitude}}'
-            addPoint(lat, long, 1);
-        {% endfor %}
-        
     }
 
     let markers = {}
@@ -310,8 +386,12 @@
     const addDiv = document.getElementById("AddPointDiv");
     const confirmDiv = document.getElementById('addConfirmation');
     const selectedInfo = document.getElementById('selectedInfo');
+    const selectedLocDiv = document.getElementById("selectedLocation");
     const askForClickDiv = document.getElementById('askForClick');
     const sightingsTableBody = document.getElementById("sightingsTableBody");
+    const confirmButton = document.getElementById('confirmBtn');
+
+    var currentSelectedMarker = null;
 
     var selectedAnimal = 0;
     var selectedAnimalName = "";
@@ -330,21 +410,24 @@
         confirmDiv.style.display = 'none';
     }
 
-    // Removes div shows button
-    function cancelAdding(){
-        addButton.style.display = 'block';
-        addDiv.style.display = 'none';
-        confirmDiv.style.display = 'none';
-    }
-
     function setAnimal(animal, animalName, button){
         clearSetAnimal();
+
+        let buttonImage = button.getElementsByClassName("animalImg")[0]
+        for (let other of document.getElementsByClassName("animalImg")){
+            if(other != buttonImage){
+                other.classList.add("NonSelectedAnimal");
+            }else{
+                other.classList.remove("NonSelectedAnimal");
+            }
+        }
+
         button.classList.add("selectedAnimal");
         selectedAnimal = +animal;
         selectedAnimalName = animalName;
         
         if(selectedLocation['latitude'] != ''){
-            askForConfirmationOnAdd();
+            enableConfirmButton();
         }
     }
 
@@ -352,6 +435,10 @@
         let others = document.getElementsByClassName("selectedAnimal");
         for( let other of others){
             other.classList.remove("selectedAnimal");
+        }
+
+        for(let other of document.getElementsByClassName("animalImg")){
+            other.classList.remove("NonSelectedAnimal");
         }
     }
 
@@ -363,10 +450,6 @@
 
     }
 
-    function askForClick(){
-        askForClickDiv.style.display = 'block';
-    }
-
     function setManner(manner, button){
         clearSetManner();
 
@@ -376,9 +459,8 @@
         selectedManner = manner;
     }
 
-    function askForConfirmationOnAdd(){
-        selectedInfo.innerHTML = selectedAnimalName + " sighting at " + selectedLocation['latitude'] + ", " + selectedLocation['longitude'] + " please confirm";
-        confirmDiv.style.display = 'block';
+    function enableConfirmButton(){
+        (confirmButton).disabled = false;
     }
 
     function sendPostRequest(){
@@ -388,12 +470,6 @@
             "latitude": selectedLocation["latitude"],
             "longitude": selectedLocation["longitude"]
         };
-
-        
-        
-        cancelAdding();
-        clearSetAnimal();
-        clearSetManner();
 
         const headers = {
             'Content-Type': 'application/json', // You can adjust this as needed
@@ -411,13 +487,6 @@
         })
         .then(data => {
             console.log(data)
-            sightingsTableBody.innerHTML +=  `<tr class="sightingRow"
-            onmouseenter="addMapMarker('${selectedLocation['latitude']}', '${selectedLocation['longitude']}', '${selectedAnimalName}')"
-            onmouseleave="removeMapMarker()">
-            <td>${data['serialNum']}</td>
-            <td>${selectedAnimalName}}</td>
-            <td>${data['dateTime']}</td>
-        </tr>`
         })
         .catch(error => {
             console.error('Error:', error);
@@ -430,7 +499,9 @@
             'longitude' : '',
             'latitude'  : ''
         };
+        (confirmButton).disabled = true;
     }
+
 </script>
 
 </html>
