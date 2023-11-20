@@ -27,6 +27,7 @@ urlpatterns = [
     path('', views.index),
     path('addSightingPage', views.addSightingPage),
     path('addSighting', views.addSighting),
+    path('filterTable', views.filterTable),
     ]
     
 if settings.DEBUG:

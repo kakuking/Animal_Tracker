@@ -20,6 +20,16 @@
         cursor: pointer;
     }
 
+    button {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+    }
+
     table {
         cursor: default;
     }
@@ -51,7 +61,40 @@
         display: none;
     }
 
+    .mannerImg, .animalImg, .confirmBtn{
+        width: 60px;
+        height: 60px;
+    }
+
+    .filterAnimal{
+        margin-top: 5px;
+    }
+
+    .animalImg, .filterBtn{
+        margin: 5px;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+        filter: grayscale(0%);
+    }
     
+    .animalImg:hover, .filterBtn:hover{
+        background-color: aquamarine;
+        transform: translate(-2px, -2px);
+        box-shadow: 20px 20px 20px rgba(0,0,0,.5);
+    }
+
+    .filterBtn{
+        border: 2px solid black;
+    }
+
+    .filteredAnimal{
+        filter: grayscale(100%);
+    }
+
+    p{
+        padding: 0px;
+        margin: 0px;
+    }
 </style>
 
 <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
@@ -86,8 +129,23 @@
 
     <div class="main">
         <div id="map" style=""></div>
+        <div class="filterAnimal">
+            <p>Filter by animal:</p>
+            {% for animal in animals %}
+                <button onclick="addFilterAnimal('{{animal.id}}', '{{animal.animal}}', this)">
+                    <img class="animalImg" src='{% static ""|add:animal.animal|add:".jpg" %}' alt="Automatically Set">
+                </button>
+            {% endfor %}
+        </div>
+        <button class="filterBtn" onclick="sendFilterTable()">Filter</button>
+        <button class="filterBtn" onclick="clearFilter()">Clear Filter</button>
     </div>
-        <!-- Table -->
+
+    <!-- <button onclick="sendReq()"></button> -->
+
+    
+
+    <!-- Table -->
     <div id="sightingsTable">
         <table id="sightingsTable">
             <thead>
@@ -217,9 +275,6 @@
             radius: 10,
             max: 0.1,
         }).addTo(map);
-
-        console.log("Cleared all points; Current max: ", max_heat_map_val);
-
     }
 
     function addPoint(lat, long, intensity){
@@ -304,132 +359,71 @@
             map.removeLayer(currentHoverMarker);
             currentHoverMarker = null;
         }
-    }
+    } 
 
-    const addButton = document.getElementById("addPointButton");
-    const addDiv = document.getElementById("AddPointDiv");
-    const confirmDiv = document.getElementById('addConfirmation');
-    const selectedInfo = document.getElementById('selectedInfo');
-    const askForClickDiv = document.getElementById('askForClick');
-    const sightingsTableBody = document.getElementById("sightingsTableBody");
+    var filteredAnimals = [];
+    const sightingsTableDiv = document.getElementById("sightingsTable");
 
-    var selectedAnimal = 0;
-    var selectedAnimalName = "";
-    var selectedManner = "";
-    var settingLocation = false;
+    function addFilterAnimal(animalID, animalName, button){
+        var index = filteredAnimals.indexOf(+animalID);
 
-    var selectedLocation = {
-        'longitude' : '',
-        'latitude'  : ''
-    };
-
-    // Shows div to add sighting
-    function askSightingManner(){
-        addButton.style.display = 'none';
-        addDiv.style.display = 'block';
-        confirmDiv.style.display = 'none';
-    }
-
-    // Removes div shows button
-    function cancelAdding(){
-        addButton.style.display = 'block';
-        addDiv.style.display = 'none';
-        confirmDiv.style.display = 'none';
-    }
-
-    function setAnimal(animal, animalName, button){
-        clearSetAnimal();
-        button.classList.add("selectedAnimal");
-        selectedAnimal = +animal;
-        selectedAnimalName = animalName;
-        
-        if(selectedLocation['latitude'] != ''){
-            askForConfirmationOnAdd();
+        if(index == -1){
+            filteredAnimals.push(+animalID);
+            button.classList.add("filteredAnimal")
+        }else{
+            button.classList.remove("filteredAnimal")
+            filteredAnimals.splice(index, 1);
         }
     }
 
-    function clearSetAnimal(){
-        let others = document.getElementsByClassName("selectedAnimal");
-        for( let other of others){
-            other.classList.remove("selectedAnimal");
+    function clearFilter(){
+        filteredAnimals = [];
+        sendFilterTable();
+
+        let prevFilter = document.getElementsByClassName("animalImg");
+
+        for(var prev of prevFilter){
+            prev.parentElement.classList.remove("filteredAnimal");
         }
     }
 
-    function clearSetManner(){
-        let others = document.getElementsByClassName("selectedManner");
-        for( let other of others){
-            other.classList.remove("selectedManner");
-        }
-
-    }
-
-    function askForClick(){
-        askForClickDiv.style.display = 'block';
-    }
-
-    function setManner(manner, button){
-        clearSetManner();
-
-        settingLocation = true;
-
-        button.classList.add("selectedManner");
-        selectedManner = manner;
-    }
-
-    function askForConfirmationOnAdd(){
-        selectedInfo.innerHTML = selectedAnimalName + " sighting at " + selectedLocation['latitude'] + ", " + selectedLocation['longitude'] + " please confirm";
-        confirmDiv.style.display = 'block';
-    }
-
-    function sendPostRequest(){
-        const url = "http://127.0.0.1:8000/addSighting";
+    function sendFilterTable()
+    {  
+        const url = "http://127.0.0.1:8000/filterTable";
+        animals = ["dog", "cat"]
         const data = {
-            "animal": selectedAnimal,
-            "latitude": selectedLocation["latitude"],
-            "longitude": selectedLocation["longitude"]
-        };
-
-        
-        
-        cancelAdding();
-        clearSetAnimal();
-        clearSetManner();
-
-        const headers = {
-            'Content-Type': 'application/json', // You can adjust this as needed
+            animals: filteredAnimals,
         };
 
         fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(data)
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Add any other headers you might need
+        },
+        body: JSON.stringify(data),
         })
+        .then(response => response.text())
         .then(data => {
-            console.log(data)
-            sightingsTableBody.innerHTML +=  `<tr class="sightingRow"
-            onmouseenter="addMapMarker('${selectedLocation['latitude']}', '${selectedLocation['longitude']}', '${selectedAnimalName}')"
-            onmouseleave="removeMapMarker()">
-            <td>${data['serialNum']}</td>
-            <td>${selectedAnimalName}}</td>
-            <td>${data['dateTime']}</td>
-        </tr>`
+            sightingsTableDiv.innerHTML = data;
+            // Handle the response from the server
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error:', error);
+            // Handle errors
         });
-        addPoint(selectedLocation["latitude"],selectedLocation["longitude"],1);
-        selectedInfo.innerHTML = "";
-        selectedAnimal = 0
-        selectedAnimalName = "";
-        selectedLocation = {
-            'longitude' : '',
-            'latitude'  : ''
-        };
+
+        clearPoints();
+
+        {%for sighting in sightings%}
+            lat = +'{{sighting.latitude}}'
+            long = +'{{sighting.longitude}}'
+            var animalInFilterIdx = filteredAnimals.indexOf(+'{{sighting.animalType.id}}');
+            
+            if(animalInFilterIdx == -1){
+                addPoint(lat, long, 1);
+            }
+        {% endfor %}
     }
 </script>
 

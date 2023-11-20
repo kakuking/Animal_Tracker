@@ -22,9 +22,24 @@ def addSightingPage(request):
         'sightings': all_sightings,
         'animals': animals
     }
+        
     return render(request, 'Dashboard/addSighting.html', context=ctx)
 
+@csrf_exempt
+def filterTable(request):
+    data = json.loads(request.body.decode('utf-8'))
+    animal_list = data.get('animals', [])
 
+    # print(animal_list)
+    
+    sightings = sighting.objects.exclude(animalType__in=animal_list)
+    
+    ctx = {
+        'sightings': sightings
+    }
+        
+    return render(request, 'Dashboard/table.html', context=ctx)
+    
 @csrf_exempt
 def addSighting(request):
     if request.method != "POST":

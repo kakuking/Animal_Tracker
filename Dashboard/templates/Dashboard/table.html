@@ -1,0 +1,21 @@
+<table id="sightingsTable">
+    
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Animal</th>
+            <th>Last Seen</th>
+        </tr>
+    </thead>
+    <tbody id="sightingsTableBody">
+        {% for sighting in sightings %}
+        <tr class="sightingRow"
+            onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
+            onmouseleave="removeMapMarker()">
+            <td>{{ sighting.id }}</td>
+            <td>{{ sighting.animalType.animal }}</td>
+            <td>{{ sighting.dateTime }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
