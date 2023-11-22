@@ -92,7 +92,7 @@ h1{
     justify-content: center;
 }
 .items:hover{
-    background:#5E6973;
+    background:var(--color_table_hover);
     cursor: pointer;
 }
 
