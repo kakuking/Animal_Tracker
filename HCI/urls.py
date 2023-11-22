@@ -28,6 +28,8 @@ urlpatterns = [
     path('addSightingPage', views.addSightingPage),
     path('addSighting', views.addSighting),
     path('filterTable', views.filterTable),
+    path('guidelinesPage', views.guidelinesPage),
+    path('discussionsPage', views.discussionsPage),
     ]
     
 if settings.DEBUG:

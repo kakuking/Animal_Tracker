@@ -169,19 +169,21 @@ h1{
 }
 
 .light_mode{
-    --color_start_navbar : #1da8ab;
-    --color_end_navbar : #70e6b1;
-    --color_start_body : #22c0c3;
-    --color_end_body : #7CFFC4;
+    --color_start_navbar : #ff8f9c;
+    --color_end_navbar : #ff8f9c;
+    --color_start_body : #ff8f9c;
+    --color_end_body : #ff8f9c;
+    --color_table_hover : #ba666f;
     --text_color : black;
 }
 
 .dark_mode{
-    --color_start_navbar : #132740;
-    --color_end_navbar : #304366;
-    --color_start_body : #18314F;
-    --color_end_body : #384E77;
-    --text_color : #d3e1f2;
+    --color_start_navbar : #8e555b;
+    --color_end_navbar : #8e555b;
+    --color_start_body : #8e555b;
+    --color_end_body : #8e555b;
+    --color_table_hover : #de8790;
+    --text_color : white;
 }
 
 .light{

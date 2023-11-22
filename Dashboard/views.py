@@ -65,3 +65,8 @@ def addSighting(request):
         'dateTime': sig.dateTime
     })
 
+def guidelinesPage(request):
+    return render(request, 'Dashboard/guidelines.html')
+
+def discussionsPage(request):
+    return render(request, 'Dashboard/discussions.html')

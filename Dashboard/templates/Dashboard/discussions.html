@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dosis:wght@300&display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+
+<style>
+    .content:hover{
+        cursor: pointer;
+    }
+</style>
+
+<body onload="addSightingsToMap()" class="dark_mode">
+    <div class="NavBar dark_mode" id="navbar">
+        <a title="One" class="item1 items" href="/">
+            <img width="65" height="65" src='{% static "Map.png" %}'>                              
+        </a>
+        <a title="Two" class="item2 items" href="/addSightingPage">
+            <img width="40" height="40" src='{% static "Plus.png" %}'>                              
+        </a>
+        <a href="/discussionsPage" class="item3 items">
+            <img width="40" height="40" src="{% static 'Threads.png' %}">
+        </a>
+        <a href="/guidelinesPage" class="item4 items">
+            <img width="40" height="40" src="{% static 'guidelines.png' %}">
+        </a>
+        <a title="change theme" class="dark items" id="changeTheme">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="sun-and-moon">
+            <g id="moon" class="night">
+                <path id="moon_2" fill-rule="evenodd" clip-rule="evenodd" d="M50.5 73C62.9264 73 73 62.9264 73 50.5C73 49.6864 72.9568 48.8828 72.8726 48.0916C71.8418 56.4937 64.6807 63 56 63C46.6112 63 39 55.3888 39 46C39 36.6112 46.6112 29 56 29C56.4418 29 56.8797 29.0169 57.313 29.05C55.1639 28.368 52.8749 28 50.5 28C38.0736 28 28 38.0736 28 50.5C28 62.9264 38.0736 73 50.5 73Z" fill="#FFE792"/>
+            </g>
+            <g id="Sun" class="day">
+                <circle id="Sun_inner" cx="50.5" cy="50.5" r="22.5" fill="#FFC703"/>
+                <circle id="Sun_outer" cx="50.5" cy="50.5" r="28.5" fill="#FF8D3B" fill-opacity="0.5"/>
+            </g>
+            <g id="Stars" class="night">
+                <path id="Star 1" class="stars" d="M68.5 13L69.9593 17.4914H74.6819L70.8613 20.2672L72.3206 24.7586L68.5 21.9828L64.6794 24.7586L66.1387 20.2672L62.3181 17.4914H67.0407L68.5 13Z" fill="#FCFF68"/>
+                <path id="Star 2" class="stars" d="M21 31L21.8981 33.7639H24.8042L22.4531 35.4721L23.3511 38.2361L21 36.5279L18.6489 38.2361L19.5469 35.4721L17.1958 33.7639H20.1019L21 31Z" fill="#FCFF68"/>
+                <path id="Star 3" class="stars" d="M45 77L45.6735 78.7275H47.8532L46.0898 79.7951L46.7634 81.5225L45 80.4549L43.2366 81.5225L43.9102 79.7951L42.1468 78.7275H44.3265L45 77Z" fill="#FCFF68"/>
+            </g>
+            </g>
+            </svg>
+        </a>
+    </div>
+
+    <div class="main">
+        <h1 >Recent Discussions</h1>
+
+        <p class="content"><strong>Joining Animal Welfare Discussions:</strong><br>Engage in conversations about animal welfare on campus, discussing topics such as responsible pet ownership, wildlife conservation, and promoting a harmonious coexistence between humans and animals.</p>
+
+        <p class="content"><strong>Sharing Personal Experiences:</strong><br>Contribute to the community by sharing personal experiences related to animal encounters, rescue efforts, or instances where students have actively participated in animal welfare initiatives.</p>
+        
+        <p class="content"><strong>Discussing Campus Policies:</strong><br>Talk about existing campus policies or propose new guidelines that can enhance animal welfare. Collaborate with fellow students to create awareness and support for these initiatives.</p>
+        
+        <p class="content"><strong>Organizing "Pawsitively" Good Campaigns:</strong><br>Initiate discussions on planning and executing awareness campaigns to educate students about local wildlife, responsible feeding practices, and the importance of reporting animal-related concerns promptly.</p>
+        
+        <p class="content"><strong>Highlighting Conservation Efforts:</strong><br>Share information about local conservation efforts or global initiatives related to animal welfare. Discuss ways in which the campus community can contribute to these causes.</p>
+        
+        <p class="content"><strong>Purr-spectives on Stray Cats:</strong><br>Discuss specific issues related to certain species on campus, such as the presence of stray cats or concerns about nesting birds. Brainstorm solutions and propose action plans.</p>
+        
+        <p class="content"><strong>Encouraging Responsible Behavior:</strong><br>Promote responsible behavior among students, such as refraining from feeding wildlife, avoiding interference with natural habitats, and respecting designated animal-friendly zones on campus.</p>
+        
+        <p class="content"><strong>Seeking Volunteers for "Paw-some" Initiatives:</strong><br>Recruit volunteers for various animal welfare initiatives, such as organizing adoption drives, conducting educational workshops, or participating in community clean-up efforts to create a safer environment for both humans and animals.</p>
+        
+        <p class="content"><strong>Connecting with Local "Hare"-thorities:</strong><br>Discuss the possibility of establishing a connection with local animal control agencies or wildlife rehabilitation centers. Explore ways in which students can collaborate with these entities to address animal-related issues effectively.</p>
+        
+        <p class="content"><strong>Creating a Supportive "Zoo"-munity:</strong><br>Emphasize the importance of fostering a supportive and compassionate community dedicated to the well-being of animals. Encourage students to actively participate in discussions and contribute ideas to make a positive impact.</p>
+        
+        <p class="content"><strong>Spreading "Pawsitivity" with Animal Jokes:</strong><br>Share lighthearted animal-related puns and jokes to bring a smile to the community. Laughter is a "purr-fect" way to create a positive and inclusive atmosphere.</p>
+        
+        <p class="content"><strong>Squirrel Sightings and Other "Nuts" Encounters:</strong><br>Share amusing anecdotes about wildlife sightings on campus, from curious squirrels to unexpected encounters with feathered friends. Celebrate the quirks of campus fauna with fellow students.</p>        
+    </div>
+
+    <!-- <button onclick="sendReq()"></button> -->
+</body>
+
+
+<!-- For light and dark mode -->
+<script>
+    const body = document.body;
+    const navbar = document.getElementById("navbar");
+    const button = document.getElementById("changeTheme");
+    var theme = localStorage.getItem('Storagetheme'); //true is light mode
+
+    // theme = localStorage.getItem('theme');
+    if(theme != null){
+        if(theme == 'light'){
+            body.classList.replace('dark_mode', 'light_mode');
+            navbar.classList.replace('dark_mode', 'light_mode');
+            button.classList.replace('dark', 'light');
+
+        } else {
+            body.classList.replace('light_mode', 'dark_mode');
+            navbar.classList.replace('light_mode', 'dark_mode');
+            button.classList.replace('light', 'dark');
+        }
+    }
+
+    button.onclick = () => {
+        if(theme != 'light'){
+            body.classList.replace('dark_mode', 'light_mode');
+            navbar.classList.replace('dark_mode', 'light_mode');
+            button.classList.replace('dark', 'light');
+
+            localStorage.setItem('Storagetheme', 'light');
+            theme = 'light';
+
+        } else {
+            body.classList.replace('light_mode', 'dark_mode');
+            navbar.classList.replace('light_mode', 'dark_mode');
+            button.classList.replace('light', 'dark');
+            theme = 'dark';
+            localStorage.setItem('Storagetheme', 'dark');
+        }
+    }
+</script>
