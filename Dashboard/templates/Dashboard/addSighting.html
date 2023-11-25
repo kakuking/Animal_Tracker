@@ -80,7 +80,7 @@
         outline: inherit;
     }
 
-    #askForClicking, #askForLocation, .confirmBtn{
+    #askForClicking, #askForLocation, .confirmBtn   {
         border: 2px solid black;
     }
 
@@ -126,6 +126,15 @@
         padding-top: 8px;
     }
 
+    .addingStuff{
+        border: 2px solid black;
+        border-radius: 10px;
+        margin-left: 10px;
+    }
+
+    #confirmBtn {
+        margin-left: 5px;
+    }
 </style>
 
 
@@ -167,31 +176,47 @@
         <div id="map"></div>
         
         <!-- Add a new point -->
-        <div class="addingManner">
-            <button onclick="setManner('click', this);" id="askForClicking">
-                <img class="mannerImg" src="{% static 'SelectMap.png' %}" alt="Click on Map">
-            </button>
-            <button onclick="setManner('ask', this); getLocation()" id="askForLocation"> 
-                <img class="mannerImg" src="{% static 'AutoLocate.png' %}" alt="Automatically Set">
-            </button>
-            <button id="selectedLocation" disabled>Selected Location: ~</button>
-        </div>
-        
-        <div class="addAnimal">
-            {% for animal in animals %}
-                <button onclick="setAnimal('{{animal.id}}', '{{animal.animal}}', this)">
-                    <img class="animalImg" src='{% static ""|add:animal.animal|add:".jpg" %}' alt="Automatically Set">
+        <div class="addingStuff">
+            <div class="addingManner">
+                <button onclick="setManner('click', this);" id="askForClicking">
+                    <img class="mannerImg" src="{% static 'SelectMap.png' %}" alt="Click on Map">
                 </button>
-            {% endfor %}
+                <button onclick="setManner('ask', this); getLocation()" id="askForLocation"> 
+                    <img class="mannerImg" src="{% static 'AutoLocate.png' %}" alt="Automatically Set">
+                </button>
+                <button id="selectedLocation" disabled>Selected Location: ~</button>
+            </div>
+            
+            <div class="addAnimal">
+                {% for animal in animals %}
+                    <button onclick="setAnimal('{{animal.id}}', '{{animal.animal}}', this)">
+                        <img class="animalImg" src='{% static ""|add:animal.animal|add:".jpg" %}' alt="Automatically Set">
+                    </button>
+                {% endfor %}
+            </div>
+    
+            <div id="addConfirmation">
+                <div id="selectedInfo"></div>
+                <button onclick="sendPostRequest()" id="confirmBtn" disabled>
+                    <img class="confirmBtn" src="{% static 'tick.png' %}" alt="Confirm">
+                </button>
+            </div>
         </div>
 
-        <div id="addConfirmation">
-            <div id="selectedInfo"></div>
-            <button onclick="sendPostRequest()" id="confirmBtn" disabled>
-                <img class="confirmBtn" src="{% static 'tick.png' %}" alt="Confirm">
-            </button>
-        </div>
+    </div>
 
+    <button id="SOSButton" onclick="sendSOS();">SOS</button>
+
+    <div id="customAlert" class="alert">
+        <div class="alert-content">
+            <span class="close-btn" onclick="closeAlert()">X</span>
+            <br>
+            <p>Medical Center: +91-6969696969</p>
+            <br>
+            <p>Veterinarian: +91-6969696969</p>
+            <br>
+            <p>Warden: +91-6969696969</p>
+        </div> 
     </div>
 </body>
 
@@ -528,6 +553,37 @@
             'latitude'  : ''
         };
         (confirmButton).disabled = true;
+    }
+
+    SOS_button = document.getElementById("SOSButton");
+    var beep;
+
+    function sendSOS(){
+        if(!beep || beep.paused){
+            beep = new Audio("{% static 'loud_beep.mp3' %}");
+            beep.loop = true;
+            beep.volume = 1.0;
+            
+            beep.play();
+
+            //alert("Medical Center - +91-6969696969\nVeterinarian - +91-6969696969\nWarden - +91-6969696969");
+            
+            SOS_button.classList.add("flashingButton");
+            showAlert();
+        }else{
+            beep.pause();
+            SOS_button.classList.remove("flashingButton");
+        }
+    }
+
+    function showAlert() {
+        var customAlert = document.getElementById("customAlert");
+        customAlert.style.display = "block";
+    }
+    
+    function closeAlert() {
+        var customAlert = document.getElementById("customAlert");
+        customAlert.style.display = "none";
     }
 
 </script>

@@ -14,6 +14,10 @@
     .content:hover{
         cursor: pointer;
     }
+
+    .content{
+        border: 2px solid black;
+    }
 </style>
 
 <body onload="addSightingsToMap()" class="dark_mode">
@@ -79,6 +83,19 @@
     </div>
 
     <!-- <button onclick="sendReq()"></button> -->
+    <button id="SOSButton" onclick="sendSOS();">SOS</button>
+
+    <div id="customAlert" class="alert">
+        <div class="alert-content">
+            <span class="close-btn" onclick="closeAlert()">X</span>
+            <br>
+            <p>Medical Center: +91-6969696969</p>
+            <br>
+            <p>Veterinarian: +91-6969696969</p>
+            <br>
+            <p>Warden: +91-6969696969</p>
+        </div>  
+    </div>
 </body>
 
 
@@ -119,5 +136,36 @@
             theme = 'dark';
             localStorage.setItem('Storagetheme', 'dark');
         }
+    }
+
+    SOS_button = document.getElementById("SOSButton");
+    var beep;
+
+    function sendSOS(){
+        if(!beep || beep.paused){
+            beep = new Audio("{% static 'loud_beep.mp3' %}");
+            beep.loop = true;
+            beep.volume = 1.0;
+            
+            beep.play();
+
+            //alert("Medical Center - +91-6969696969\nVeterinarian - +91-6969696969\nWarden - +91-6969696969");
+            
+            SOS_button.classList.add("flashingButton");
+            showAlert();
+        }else{
+            beep.pause();
+            SOS_button.classList.remove("flashingButton");
+        }
+    }
+
+    function showAlert() {
+        var customAlert = document.getElementById("customAlert");
+        customAlert.style.display = "block";
+    }
+    
+    function closeAlert() {
+        var customAlert = document.getElementById("customAlert");
+        customAlert.style.display = "none";
     }
 </script>
