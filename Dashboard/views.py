@@ -42,7 +42,7 @@ def filterTable(request):
 
     curTime = timezone.now()
 
-    sightings = [sight for sight in sightings if curTime - sight.dateTime <= timezone.timedelta(hours=1)]
+    sightings = [sight for sight in sightings if curTime - sight.dateTime <= timezone.timedelta(hours=5)]
     ctx = {
         'sightings': sightings
     }
