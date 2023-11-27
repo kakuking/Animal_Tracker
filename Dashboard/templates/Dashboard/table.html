@@ -12,7 +12,7 @@
         <tr class="sightingRow"
             onmouseenter="addMapMarker('{{sighting.latitude}}', '{{sighting.longitude}}', '{{sighting.animalType.animal}}')"
             onmouseleave="removeMapMarker()">
-            <td>{{ sighting.id }}</td>
+            <td>{{ forloop.counter }}</td>
             <td>{{ sighting.animalType.animal }}</td>
             <td>{{ sighting.dateTime }}</td>
         </tr>

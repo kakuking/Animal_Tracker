@@ -110,7 +110,7 @@
     }
 
     .selectedManner{
-        background-color: aquamarine;
+        background-color: var(--color_table_hover);
     }
 
     .selectedAnimal {
@@ -133,6 +133,14 @@
     }
 
     #confirmBtn {
+        margin-left: 5px;
+    }
+
+    #addedConfirmSpan{
+        display: none;
+    }
+
+    #id_label{
         margin-left: 5px;
     }
 </style>
@@ -194,12 +202,15 @@
                     </button>
                 {% endfor %}
             </div>
-    
+
+            <label id="id_label" for="ID">ID_No. - </label>
+            <input type="text" name="ID" id="ID_input">
+
             <div id="addConfirmation">
-                <div id="selectedInfo"></div>
                 <button onclick="sendPostRequest()" id="confirmBtn" disabled>
                     <img class="confirmBtn" src="{% static 'tick.png' %}" alt="Confirm">
                 </button>
+                <span id="addedConfirmSpan">Added :)</span>
             </div>
         </div>
 
@@ -438,11 +449,12 @@
     const addButton = document.getElementById("addPointButton");
     const addDiv = document.getElementById("AddPointDiv");
     const confirmDiv = document.getElementById('addConfirmation');
-    const selectedInfo = document.getElementById('selectedInfo');
     const selectedLocDiv = document.getElementById("selectedLocation");
     const askForClickDiv = document.getElementById('askForClick');
     const sightingsTableBody = document.getElementById("sightingsTableBody");
     const confirmButton = document.getElementById('confirmBtn');
+
+    const ID_text_input = document.getElementById("ID_input");
 
     var currentSelectedMarker = null;
 
@@ -521,8 +533,11 @@
         const data = {
             "animal": selectedAnimal,
             "latitude": selectedLocation["latitude"],
-            "longitude": selectedLocation["longitude"]
+            "longitude": selectedLocation["longitude"],
+            "id_submitted": ID_text_input.value,
         };
+
+        console.log();
 
         const headers = {
             'Content-Type': 'application/json', // You can adjust this as needed
@@ -539,20 +554,22 @@
             return response.json();
         })
         .then(data => {
-            console.log(data)
+            console.log(data);
+            document.getElementById("addedConfirmSpan").style.display = "inline";
+
+            addPoint(selectedLocation["latitude"],selectedLocation["longitude"],1);
+            selectedAnimal = 0
+            selectedAnimalName = "";
+            selectedLocation = {
+                'longitude' : '',
+                'latitude'  : ''
+            };
+            (confirmButton).disabled = true;
         })
         .catch(error => {
-            console.error('Error:', error);
+            alert("Enter an ID")            
         });
-        addPoint(selectedLocation["latitude"],selectedLocation["longitude"],1);
-        selectedInfo.innerHTML = "";
-        selectedAnimal = 0
-        selectedAnimalName = "";
-        selectedLocation = {
-            'longitude' : '',
-            'latitude'  : ''
-        };
-        (confirmButton).disabled = true;
+        
     }
 
     SOS_button = document.getElementById("SOSButton");

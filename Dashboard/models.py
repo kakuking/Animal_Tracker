@@ -14,6 +14,7 @@ class sighting(models.Model):
     longitude = models.FloatField(default=78.574729)
     animalType = models.ForeignKey(animal, on_delete=models.CASCADE)
     dateTime = models.DateTimeField(default=timezone.now)
+    id_submitted = models.CharField(default="2020ABCD0001H", max_length=13, null=False)
     
     def __str__(self):
         return f"{self.latitude}, {self.longitude}, {self.animalType}"

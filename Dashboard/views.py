@@ -2,6 +2,7 @@ from django.shortcuts import render
 from Dashboard.models import sighting, animal
 
 import json
+from django.utils import timezone
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -9,6 +10,11 @@ from django.views.decorators.csrf import csrf_exempt
 def index(request):
     all_sightings = sighting.objects.all()
     animals = animal.objects.all()
+    
+    curTime = timezone.now()
+
+    all_sightings = [sight for sight in all_sightings if curTime - sight.dateTime <= timezone.timedelta(hours=5)]
+    
     ctx = {
         'sightings': all_sightings,
         'animals': animals
@@ -33,7 +39,10 @@ def filterTable(request):
     # print(animal_list)
     
     sightings = sighting.objects.exclude(animalType__in=animal_list)
-    
+
+    curTime = timezone.now()
+
+    sightings = [sight for sight in sightings if curTime - sight.dateTime <= timezone.timedelta(hours=1)]
     ctx = {
         'sightings': sightings
     }
@@ -52,10 +61,14 @@ def addSighting(request):
     animalType = data.get("animal")
     latitude = data.get("latitude")
     longitude = data.get("longitude")
+    id_submitted = data.get("id_submitted")
 
     animalOfType = animal.objects.get(pk=animalType)
 
-    sig = sighting(animalType=animalOfType,latitude=latitude,longitude=longitude)
+    if(len(id_submitted) < 13):
+        return HttpResponse(status=400)
+
+    sig = sighting(animalType=animalOfType,latitude=latitude,longitude=longitude,id_submitted=id_submitted)
     sig.save()
 
     print("Added Sighting");
